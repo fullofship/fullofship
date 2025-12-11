@@ -110,7 +110,12 @@ class FullOfShip {
             new FullOfShip_Admin_Settings();
         }
 
-        // Dokan integration will be loaded here in Step 3
+        // Load Dokan integration
+        if ( function_exists( 'dokan' ) || class_exists( 'WeDevs_Dokan' ) ) {
+            require_once FULLOFSHIP_PLUGIN_DIR . 'vendor-dashboard/class-fullofship-dokan-integration.php';
+            new FullOfShip_Dokan_Integration();
+        }
+
         // Shipping method is registered via filter (see register_shipping_method)
     }
 

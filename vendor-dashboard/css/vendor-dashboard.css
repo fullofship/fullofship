@@ -1,0 +1,291 @@
+/**
+ * FullOfShip Vendor Dashboard Styles
+ *
+ * @package FullOfShip
+ */
+
+/* Shipping Boxes Page */
+.fullofship-boxes-wrapper {
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+}
+
+.fullofship-boxes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.fullofship-boxes-header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* Empty State */
+.fullofship-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.fullofship-empty-icon {
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.fullofship-empty-state h2 {
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.fullofship-empty-state p {
+    color: #777;
+    margin-bottom: 20px;
+}
+
+/* Box Status */
+.fullofship-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.fullofship-status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.fullofship-status-inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Actions */
+.fullofship-actions {
+    white-space: nowrap;
+}
+
+.fullofship-actions .dokan-btn {
+    margin-right: 5px;
+}
+
+/* Modal */
+.fullofship-modal {
+    display: none;
+    position: fixed;
+    z-index: 999999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.fullofship-modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 5px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+
+.fullofship-modal-close {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    line-height: 20px;
+}
+
+.fullofship-modal-close:hover,
+.fullofship-modal-close:focus {
+    color: #000;
+}
+
+#fullofship-modal-title {
+    margin: 0 0 20px;
+    font-size: 20px;
+}
+
+/* Form Dimensions Row */
+.fullofship-dimensions-row,
+.fullofship-weight-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fullofship-dimensions-row input[type="number"],
+.fullofship-weight-row input[type="number"] {
+    flex: 1;
+}
+
+.fullofship-dimensions-row select,
+.fullofship-weight-row select {
+    width: auto;
+    min-width: 80px;
+}
+
+.fullofship-separator {
+    color: #999;
+    font-weight: bold;
+}
+
+/* Modal Footer */
+.fullofship-modal-footer {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e5e5;
+    text-align: right;
+}
+
+.fullofship-modal-footer .dokan-btn {
+    margin-left: 10px;
+}
+
+/* Loading Overlay */
+.fullofship-loading {
+    display: none;
+    position: fixed;
+    z-index: 9999999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.fullofship-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: fullofship-spin 1s linear infinite;
+}
+
+@keyframes fullofship-spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Product Box Selector */
+.fullofship-product-boxes {
+    margin-top: 10px;
+}
+
+.fullofship-box-checkboxes {
+    margin: 15px 0;
+}
+
+.fullofship-box-option {
+    display: block;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.fullofship-box-option:hover {
+    border-color: #aaa;
+    background-color: #f9f9f9;
+}
+
+.fullofship-box-option input[type="checkbox"] {
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.fullofship-box-details {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.fullofship-box-details strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.fullofship-box-details small {
+    color: #666;
+}
+
+.fullofship-notice-warning {
+    padding: 10px;
+    background: #fff3cd;
+    border-left: 3px solid #ffc107;
+    margin-top: 15px;
+}
+
+.fullofship-notice-warning i {
+    margin-right: 5px;
+}
+
+.fullofship-no-boxes-notice {
+    padding: 15px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.fullofship-no-boxes-notice i {
+    margin-right: 5px;
+    color: #17a2b8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .fullofship-boxes-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fullofship-boxes-header h1 {
+        margin-bottom: 10px;
+    }
+
+    .fullofship-dimensions-row,
+    .fullofship-weight-row {
+        flex-wrap: wrap;
+    }
+
+    .fullofship-actions .dokan-btn {
+        display: block;
+        margin-bottom: 5px;
+        width: 100%;
+    }
+
+    .dokan-table {
+        font-size: 12px;
+    }
+}
+
+/* Required field indicator */
+.required {
+    color: #f00;
+}
+
+/* Help text */
+.help-block {
+    font-size: 13px;
+    color: #666;
+    margin: 5px 0;
+}
