@@ -1,0 +1,30 @@
+{
+    "name": "fullofship/fullofship",
+    "description": "WooCommerce + Dokan multi-vendor shipping plugin with live carrier rates",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "FullOfShip",
+            "email": "info@fullofship.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "pdt256/shipping": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FullOfShip\\": "includes/"
+        },
+        "classmap": [
+            "includes/"
+        ]
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        },
+        "optimize-autoloader": true
+    }
+}

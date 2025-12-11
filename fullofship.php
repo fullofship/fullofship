@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: FullOfShip
- * Plugin URI: https://github.com/yourusername/fullofship
- * Description: A WooCommerce shipping plugin
+ * Plugin URI: https://github.com/fullofship/fullofship
+ * Description: Multi-vendor WooCommerce shipping plugin with live carrier rates and Dokan integration
  * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://github.com/yourusername
+ * Author: FullOfShip
+ * Author URI: https://github.com/fullofship
  * License: GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain: fullofship
@@ -26,29 +26,36 @@ define( 'FULLOFSHIP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FULLOFSHIP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 /**
- * Check if WooCommerce is active
+ * Plugin activation hook
  */
-if ( ! function_exists( 'is_plugin_active' ) ) {
-    include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+function fullofship_activate() {
+    require_once FULLOFSHIP_PLUGIN_DIR . 'includes/class-fullofship-activator.php';
+    FullOfShip_Activator::activate();
 }
+register_activation_hook( __FILE__, 'fullofship_activate' );
 
-if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) && ! function_exists( 'WC' ) ) {
-    add_action( 'admin_notices', 'fullofship_woocommerce_missing_notice' );
-    return;
-}
+/**
+ * Plugin deactivation hook
+ */
+function fullofship_deactivate() {
+    // Unscheduled events
+    $timestamp = wp_next_scheduled( 'fullofship_clean_cache' );
+    if ( $timestamp ) {
+        wp_unschedule_event( $timestamp, 'fullofship_clean_cache' );
+    }
 
-function fullofship_woocommerce_missing_notice() {
-    ?>
-    <div class="error">
-        <p><?php _e( 'FullOfShip requires WooCommerce to be installed and active.', 'fullofship' ); ?></p>
-    </div>
-    <?php
+    // Note: We don't drop tables on deactivation for data preservation
+    // Tables will only be dropped if plugin is deleted via WordPress admin
 }
+register_deactivation_hook( __FILE__, 'fullofship_deactivate' );
 
 /**
  * Initialize the plugin
  */
 function fullofship_init() {
-    // Plugin initialization code here
+    require_once FULLOFSHIP_PLUGIN_DIR . 'includes/class-fullofship.php';
+    return FullOfShip::instance();
 }
-add_action( 'plugins_loaded', 'fullofship_init' );
+
+// Start the plugin
+fullofship_init();
