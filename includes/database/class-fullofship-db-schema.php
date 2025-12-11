@@ -27,6 +27,9 @@ class FullOfShip_DB_Schema {
 
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
+        // Suppress errors during table creation
+        $wpdb->hide_errors();
+
         // Table 1: Vendor Boxes
         $vendor_boxes_table = $table_prefix . 'fullofship_vendor_boxes';
         $sql_boxes = "CREATE TABLE {$vendor_boxes_table} (
@@ -77,12 +80,45 @@ class FullOfShip_DB_Schema {
         ) {$charset_collate};";
 
         // Execute table creation
-        dbDelta( $sql_boxes );
-        dbDelta( $sql_product_boxes );
-        dbDelta( $sql_rate_cache );
+        $result_boxes = dbDelta( $sql_boxes );
+        $result_product_boxes = dbDelta( $sql_product_boxes );
+        $result_cache = dbDelta( $sql_rate_cache );
 
-        // Store database version
-        update_option( 'fullofship_db_version', self::DB_VERSION );
+        // Log any errors
+        if ( $wpdb->last_error ) {
+            FullOfShip::log( 'Database table creation error: ' . $wpdb->last_error, 'error' );
+        }
+
+        // Store database version only if tables were created successfully
+        if ( self::verify_tables_exist() ) {
+            update_option( 'fullofship_db_version', self::DB_VERSION );
+        }
+
+        // Show errors again
+        $wpdb->show_errors();
+    }
+
+    /**
+     * Verify tables exist
+     */
+    private static function verify_tables_exist() {
+        global $wpdb;
+
+        $table_prefix = $wpdb->prefix;
+        $tables = array(
+            $table_prefix . 'fullofship_vendor_boxes',
+            $table_prefix . 'fullofship_product_boxes',
+            $table_prefix . 'fullofship_rate_cache',
+        );
+
+        foreach ( $tables as $table ) {
+            $query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $table );
+            if ( $wpdb->get_var( $query ) !== $table ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

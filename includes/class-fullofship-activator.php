@@ -69,6 +69,8 @@ class FullOfShip_Activator {
             'fullofship_fallback_rate'     => '10.00',
             'fullofship_require_boxes'     => 'yes',
             'fullofship_debug_mode'        => 'no',
+            'fullofship_dimension_unit'    => 'in',
+            'fullofship_weight_unit'       => 'lbs',
             'fullofship_ups_enabled'       => 'no',
             'fullofship_fedex_enabled'     => 'no',
             'fullofship_usps_enabled'      => 'no',

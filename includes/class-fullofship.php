@@ -56,8 +56,8 @@ class FullOfShip {
         // Database schema
         require_once FULLOFSHIP_PLUGIN_DIR . 'includes/database/class-fullofship-db-schema.php';
 
-        // Check for database upgrades
-        if ( FullOfShip_DB_Schema::needs_upgrade() ) {
+        // Check for database upgrades (only in admin)
+        if ( is_admin() && FullOfShip_DB_Schema::needs_upgrade() ) {
             FullOfShip_DB_Schema::create_tables();
         }
     }
@@ -104,7 +104,12 @@ class FullOfShip {
      * Initialize plugin components
      */
     private function init_components() {
-        // Admin settings will be loaded here in Step 2
+        // Load admin settings
+        if ( is_admin() ) {
+            require_once FULLOFSHIP_PLUGIN_DIR . 'admin/class-fullofship-admin-settings.php';
+            new FullOfShip_Admin_Settings();
+        }
+
         // Dokan integration will be loaded here in Step 3
         // Shipping method is registered via filter (see register_shipping_method)
     }
