@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  wordpress:
+    image: wordpress:latest
+    container_name: fullofship-wordpress
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/fullofship
+    depends_on:
+      - db
+    networks:
+      - fullofship-network
+
+  db:
+    image: mysql:8.0
+    container_name: fullofship-db
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - fullofship-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: fullofship-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: wordpress
+      PMA_PASSWORD: wordpress
+    depends_on:
+      - db
+    networks:
+      - fullofship-network
+
+volumes:
+  wordpress_data:
+  db_data:
+
+networks:
+  fullofship-network:
+    driver: bridge
