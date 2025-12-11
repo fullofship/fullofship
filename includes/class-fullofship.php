@@ -72,6 +72,9 @@ class FullOfShip {
         // Register shipping method
         add_filter( 'woocommerce_shipping_methods', array( $this, 'register_shipping_method' ) );
 
+        // Split packages by vendor
+        add_filter( 'woocommerce_cart_shipping_packages', array( $this, 'split_packages_by_vendor' ) );
+
         // Enqueue scripts
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'frontend_enqueue_scripts' ) );
@@ -154,9 +157,21 @@ class FullOfShip {
      * Register FullOfShip shipping method
      */
     public function register_shipping_method( $methods ) {
-        // This will be implemented in Step 4
-        // For now, return methods unchanged
+        require_once FULLOFSHIP_PLUGIN_DIR . 'includes/shipping/class-fullofship-shipping-method.php';
+        $methods['fullofship'] = 'FullOfShip_Shipping_Method';
         return $methods;
+    }
+
+    /**
+     * Split packages by vendor
+     *
+     * @param array $packages WooCommerce packages
+     * @return array Split packages
+     */
+    public function split_packages_by_vendor( $packages ) {
+        require_once FULLOFSHIP_PLUGIN_DIR . 'includes/shipping/class-fullofship-package-splitter.php';
+        $splitter = new FullOfShip_Package_Splitter();
+        return $splitter->split_packages_by_vendor( $packages );
     }
 
     /**
