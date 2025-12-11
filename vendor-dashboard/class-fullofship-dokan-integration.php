@@ -18,15 +18,27 @@ class FullOfShip_Dokan_Integration {
         // Add menu item to Dokan dashboard
         add_filter( 'dokan_get_dashboard_nav', array( $this, 'add_shipping_boxes_menu' ), 20 );
 
+        // Register custom query var
+        add_filter( 'dokan_query_var_filter', array( $this, 'register_shipping_boxes_queryvar' ) );
+
+        // Register rewrite endpoint
+        add_action( 'init', array( $this, 'register_rewrite_endpoint' ) );
+
         // Load shipping boxes template
         add_action( 'dokan_load_custom_template', array( $this, 'load_shipping_boxes_template' ) );
 
-        // Add box selector to product edit page
+        // Add box selector to product edit page (Dokan)
         add_action( 'dokan_product_edit_after_main', array( $this, 'render_product_box_selector' ), 10, 2 );
 
-        // Save product box assignments
+        // Add box selector to WordPress admin product edit page
+        add_action( 'add_meta_boxes', array( $this, 'add_product_box_meta_box' ) );
+
+        // Save product box assignments (Dokan)
         add_action( 'dokan_product_updated', array( $this, 'save_product_boxes' ), 10, 2 );
         add_action( 'dokan_new_product_added', array( $this, 'save_product_boxes' ), 10, 2 );
+
+        // Save product box assignments (WordPress admin)
+        add_action( 'save_post_product', array( $this, 'save_product_boxes_admin' ), 10, 3 );
 
         // Validate vendor has boxes before publishing
         add_filter( 'dokan_can_post', array( $this, 'validate_vendor_boxes' ), 10, 2 );
@@ -42,6 +54,24 @@ class FullOfShip_Dokan_Integration {
 
         // Enqueue scripts
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_vendor_scripts' ) );
+    }
+
+    /**
+     * Register custom query var for shipping boxes
+     *
+     * @param array $query_vars Existing query vars
+     * @return array Modified query vars
+     */
+    public function register_shipping_boxes_queryvar( $query_vars ) {
+        $query_vars[] = 'shipping-boxes';
+        return $query_vars;
+    }
+
+    /**
+     * Register rewrite endpoint for shipping boxes
+     */
+    public function register_rewrite_endpoint() {
+        add_rewrite_endpoint( 'shipping-boxes', EP_PAGES );
     }
 
     /**
@@ -73,6 +103,7 @@ class FullOfShip_Dokan_Integration {
             }
 
             require_once FULLOFSHIP_PLUGIN_DIR . 'vendor-dashboard/views/box-list.php';
+            return;
         }
     }
 
@@ -147,15 +178,113 @@ class FullOfShip_Dokan_Integration {
     }
 
     /**
+     * Add shipping boxes meta box to WordPress admin product edit page
+     */
+    public function add_product_box_meta_box() {
+        add_meta_box(
+            'fullofship_product_boxes',
+            __( 'Shipping Boxes', 'fullofship' ),
+            array( $this, 'render_product_box_meta_box' ),
+            'product',
+            'side',
+            'default'
+        );
+    }
+
+    /**
+     * Render shipping boxes meta box in WordPress admin
+     *
+     * @param WP_Post $post Post object
+     */
+    public function render_product_box_meta_box( $post ) {
+        // Get product author (vendor)
+        $vendor_id = $post->post_author;
+
+        // Get vendor's boxes
+        require_once FULLOFSHIP_PLUGIN_DIR . 'includes/vendor/class-fullofship-vendor-box-manager.php';
+        $vendor_boxes = FullOfShip_Vendor_Box_Manager::get_vendor_boxes( $vendor_id );
+
+        if ( empty( $vendor_boxes ) ) {
+            echo '<p>' . esc_html__( 'The product vendor has no shipping boxes configured.', 'fullofship' ) . '</p>';
+            return;
+        }
+
+        // Get currently assigned boxes
+        $assigned_boxes = FullOfShip_Vendor_Box_Manager::get_product_boxes( $post->ID );
+        $assigned_box_ids = wp_list_pluck( $assigned_boxes, 'id' );
+
+        // Nonce for security
+        wp_nonce_field( 'fullofship_save_product_boxes', 'fullofship_product_boxes_nonce' );
+
+        echo '<div style="margin-top: 10px;">';
+        foreach ( $vendor_boxes as $box ) {
+            $checked = in_array( $box['id'], $assigned_box_ids, true ) ? 'checked' : '';
+            ?>
+            <label style="display: block; margin-bottom: 8px;">
+                <input type="checkbox"
+                       name="fullofship_product_boxes[]"
+                       value="<?php echo esc_attr( $box['id'] ); ?>"
+                       <?php echo $checked; ?>>
+                <?php echo esc_html( $box['box_name'] ); ?>
+                <span style="color: #666; font-size: 12px;">
+                    (<?php echo esc_html( $box['length'] . '×' . $box['width'] . '×' . $box['height'] . ' ' . $box['dimension_unit'] ); ?>)
+                </span>
+            </label>
+            <?php
+        }
+        echo '</div>';
+    }
+
+    /**
+     * Save product box assignments from WordPress admin
+     *
+     * @param int     $post_id Post ID
+     * @param WP_Post $post Post object
+     * @param bool    $update Whether this is an update
+     */
+    public function save_product_boxes_admin( $post_id, $post, $update ) {
+        // Verify nonce
+        if ( ! isset( $_POST['fullofship_product_boxes_nonce'] ) ||
+             ! wp_verify_nonce( $_POST['fullofship_product_boxes_nonce'], 'fullofship_save_product_boxes' ) ) {
+            return;
+        }
+
+        // Check autosave
+        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+            return;
+        }
+
+        // Check permissions
+        if ( ! current_user_can( 'edit_product', $post_id ) ) {
+            return;
+        }
+
+        // Get selected boxes
+        $box_ids = array();
+        if ( isset( $_POST['fullofship_product_boxes'] ) && is_array( $_POST['fullofship_product_boxes'] ) ) {
+            $box_ids = array_map( 'absint', $_POST['fullofship_product_boxes'] );
+        }
+
+        // Save assignments
+        require_once FULLOFSHIP_PLUGIN_DIR . 'includes/vendor/class-fullofship-vendor-box-manager.php';
+        FullOfShip_Vendor_Box_Manager::assign_product_to_boxes( $post_id, $box_ids );
+    }
+
+    /**
      * Validate vendor has boxes before publishing products
      *
      * @param bool|WP_Error $can_post Whether vendor can post
-     * @param int           $post_id Post ID
+     * @param int           $post_id Post ID (optional)
      * @return bool|WP_Error
      */
-    public function validate_vendor_boxes( $can_post, $post_id ) {
+    public function validate_vendor_boxes( $can_post, $post_id = 0 ) {
         // Only check if requirement is enabled
         if ( get_option( 'fullofship_require_boxes' ) !== 'yes' ) {
+            return $can_post;
+        }
+
+        // If no post ID provided, allow post
+        if ( ! $post_id ) {
             return $can_post;
         }
 
