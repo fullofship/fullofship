@@ -69,6 +69,9 @@ class FullOfShip {
         // Plugin initialization
         add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), 20 );
 
+        // Register admin settings
+        add_filter( 'woocommerce_get_settings_pages', array( $this, 'add_settings_page' ) );
+
         // Register shipping method
         add_filter( 'woocommerce_shipping_methods', array( $this, 'register_shipping_method' ) );
 
@@ -107,19 +110,26 @@ class FullOfShip {
      * Initialize plugin components
      */
     private function init_components() {
-        // Load admin settings
-        if ( is_admin() ) {
-            require_once FULLOFSHIP_PLUGIN_DIR . 'admin/class-fullofship-admin-settings.php';
-            new FullOfShip_Admin_Settings();
-        }
-
         // Load Dokan integration
         if ( function_exists( 'dokan' ) || class_exists( 'WeDevs_Dokan' ) ) {
             require_once FULLOFSHIP_PLUGIN_DIR . 'vendor-dashboard/class-fullofship-dokan-integration.php';
             new FullOfShip_Dokan_Integration();
         }
 
-        // Shipping method is registered via filter (see register_shipping_method)
+        // Admin settings and shipping method are registered via filters
+    }
+
+    /**
+     * Add FullOfShip settings page to WooCommerce
+     */
+    public function add_settings_page( $settings ) {
+        if ( ! class_exists( 'WC_Settings_Page' ) ) {
+            return $settings;
+        }
+
+        require_once FULLOFSHIP_PLUGIN_DIR . 'admin/class-fullofship-admin-settings.php';
+        $settings[] = new FullOfShip_Settings_Page();
+        return $settings;
     }
 
     /**

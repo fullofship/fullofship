@@ -58,7 +58,28 @@ class FullOfShip_Settings_Page extends WC_Settings_Page {
         $this->id    = 'fullofship';
         $this->label = __( 'FullOfShip', 'fullofship' );
 
+        // Add sanitization filter for sensitive settings
+        add_filter( 'woocommerce_admin_settings_sanitize_option', array( $this, 'sanitize_settings' ), 10, 3 );
+
         parent::__construct();
+    }
+
+    /**
+     * Sanitize sensitive settings
+     */
+    public function sanitize_settings( $value, $option, $raw_value ) {
+        // Sanitize API credentials
+        $sensitive_fields = array(
+            'fullofship_ups_password',
+            'fullofship_fedex_api_secret',
+            'fullofship_dhl_api_secret',
+        );
+
+        if ( in_array( $option['id'], $sensitive_fields, true ) ) {
+            return sanitize_text_field( $raw_value );
+        }
+
+        return $value;
     }
 
     /**
